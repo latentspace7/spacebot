@@ -1,0 +1,14 @@
+body { margin: 0; background: #080d1b; color: #e2e8f0; font-family: system-ui, sans-serif; }
+.demo-page { max-width: 980px; margin: auto; padding: 64px 32px; }
+.demo-mark { display: flex; align-items: center; gap: 20px; color: #a5b4fc; font-size: 12px; letter-spacing: .2em; }
+.demo-page h1 { font-size: clamp(40px, 7vw, 76px); line-height: 1.07; letter-spacing: -.06em; margin: 40px 0 24px; }
+.demo-page h1 span { color: #9ab8ff; }
+.demo-intro { color: #94a3b8; font-size: 18px; line-height: 1.7; max-width: 560px; }
+.demo-controls { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-end; margin: 40px 0; }
+.demo-controls label { display: grid; gap: 10px; color: #a5b4fc; font-size: 13px; }
+.demo-controls input, .demo-controls select, .demo-controls button { border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; padding: 12px 16px; font: inherit; }
+.demo-controls button { background: #6366f1; border-color: #818cf8; cursor: pointer; }
+.demo-notes { display: flex; gap: 30px; flex-wrap: wrap; border-top: 1px solid #1e293b; padding-top: 20px; color: #94a3b8; font-size: 13px; line-height: 1.8; }
+.demo-notes p { max-width: 240px; }
+.demo-notes strong { color: #e2e8f0; }
+@media (max-width: 639px) { .demo-page { padding: 24px; } .demo-mark { gap: 10px; } }

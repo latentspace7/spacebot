@@ -1,0 +1,117 @@
+.spacebot {
+  --spacebot-accent: #6366f1;
+  --spacebot-accent-hover: #818cf8;
+  --spacebot-surface: #020617f2;
+  --spacebot-bubble: #0f172ae6;
+  --spacebot-border: #1e293b;
+  --spacebot-text: #e2e8f0;
+  --spacebot-muted: #94a3b8;
+  --spacebot-focus: #67e8f9;
+  --spacebot-font: 'Inter', system-ui, sans-serif;
+  --spacebot-heading-font: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --spacebot-z-index: 50;
+  --spacebot-panel-width: 420px;
+  --spacebot-panel-height: 680px;
+  --spacebot-launcher-size: 144px;
+  --spacebot-mobile-launcher-size: 80px;
+  color: var(--spacebot-text);
+  font: 14px/1.5 var(--spacebot-font);
+  color-scheme: dark;
+  text-align: left;
+  letter-spacing: normal;
+}
+.spacebot *, .spacebot *::before, .spacebot *::after { box-sizing: border-box; }
+.spacebot button, .spacebot textarea { font: inherit; color: inherit; margin: 0; }
+.spacebot button { cursor: pointer; touch-action: manipulation; }
+.spacebot button:disabled { cursor: not-allowed; opacity: .5; }
+.spacebot button:focus-visible, .spacebot textarea:focus-visible { outline: 2px solid var(--spacebot-focus); outline-offset: 3px; }
+.spacebot button svg { width: 16px; height: 16px; }
+.spacebot-position {
+  position: fixed;
+  z-index: var(--spacebot-z-index);
+  top: var(--sb-desktop-top); bottom: var(--sb-desktop-bottom);
+  left: var(--sb-desktop-left); right: var(--sb-desktop-right);
+  translate: 0 var(--sb-desktop-translate);
+  max-width: calc(100% - 24px);
+  --sb-tip-left: var(--sb-desktop-tip-left);
+  --sb-tip-right: var(--sb-desktop-tip-right);
+  --sb-tip-top: var(--sb-desktop-tip-top);
+  --sb-tip-bottom: var(--sb-desktop-tip-bottom);
+  --sb-tip-translate: var(--sb-desktop-translate);
+}
+.spacebot-panel-position { width: var(--spacebot-panel-width); }
+.spacebot-panel {
+  display: flex; flex-direction: column; width: 100%;
+  height: min(var(--spacebot-panel-height), calc(100dvh - 7rem));
+  max-height: calc(100dvh - 24px);
+  overflow: hidden; border-radius: 16px; border: 1px solid #818cf840;
+  background: var(--spacebot-surface); box-shadow: 0 24px 90px -20px #4f46e5a6;
+  backdrop-filter: blur(24px);
+}
+.spacebot-header { display: flex; align-items: center; gap: 12px; flex-shrink: 0; padding: 12px 16px; border-bottom: 1px solid var(--spacebot-border); background: linear-gradient(to right, #1e1b4be6, #020617); }
+.spacebot-avatar { position: relative; display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 44px; height: 44px; border: 1px solid #22d3ee40; border-radius: 12px; background: linear-gradient(135deg, #6366f133, #22d3ee1a); }
+.spacebot .spacebot-header-robot { width: 40px; height: 40px; filter: drop-shadow(0 2px 4px #6366f140); }
+.spacebot-status { position: absolute; right: -2px; top: -2px; width: 10px; height: 10px; border: 2px solid #020617; border-radius: 50%; background: #34d399; }
+.spacebot-heading { min-width: 0; flex: 1; }
+.spacebot-heading h2 { display: flex; align-items: center; gap: 6px; margin: 0; font: 600 16px/1.35 var(--spacebot-heading-font); letter-spacing: -.02em; color: #fff; overflow-wrap: anywhere; }
+.spacebot-heading h2 svg { width: 14px; height: 14px; color: #a5b4fc; flex-shrink: 0; }
+.spacebot-heading p { margin: 2px 0 0; font-size: 12px; color: var(--spacebot-muted); overflow-wrap: anywhere; }
+.spacebot .spacebot-close { display: flex; flex-shrink: 0; padding: 8px; border: 0; border-radius: 8px; background: transparent; color: var(--spacebot-muted); }
+.spacebot .spacebot-close:hover { background: #1e293b; color: #fff; }
+.spacebot-messages { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 20px 16px; }
+.spacebot-log { display: grid; gap: 16px; }
+.spacebot-message { display: flex; }
+.spacebot-message-user { justify-content: flex-end; }
+.spacebot-bubble { max-width: 86%; padding: 10px 14px; border: 1px solid var(--spacebot-border); border-radius: 16px 16px 16px 6px; background: var(--spacebot-bubble); overflow-wrap: anywhere; line-height: 1.625; }
+.spacebot-message-user .spacebot-bubble { border: 0; border-radius: 16px 16px 6px 16px; background: #4f46e5; color: #fff; white-space: pre-wrap; }
+.spacebot-bubble p { margin: 0; }
+.spacebot-bubble p:not(:last-child) { margin-bottom: 8px; }
+.spacebot-bubble ul, .spacebot-bubble ol { margin: 8px 0; padding-left: 20px; }
+.spacebot-bubble ul { list-style: disc; }
+.spacebot-bubble ol { list-style: decimal; }
+.spacebot-bubble li + li { margin-top: 4px; }
+.spacebot-bubble strong { font-weight: 600; color: #fff; }
+.spacebot-bubble em { font-style: italic; }
+.spacebot-typing { display: flex; gap: 4px; padding: 4px 0; }
+.spacebot-typing i { width: 6px; height: 6px; border-radius: 50%; background: #a5b4fc; animation: spacebot-pulse 1.5s infinite; }
+.spacebot-typing i:nth-child(2) { animation-delay: 160ms; }
+.spacebot-typing i:nth-child(3) { animation-delay: 320ms; }
+.spacebot-footer { flex-shrink: 0; padding: 12px 16px; border-top: 1px solid var(--spacebot-border); background: #020617; }
+.spacebot-composer { display: flex; align-items: flex-end; gap: 8px; }
+.spacebot-composer textarea { flex: 1; min-width: 0; min-height: 44px; max-height: 112px; width: 100%; padding: 12px; border: 1px solid #334155; border-radius: 6px; background: #0f172acc; resize: none; line-height: 1.4; }
+.spacebot-composer textarea::placeholder { color: var(--spacebot-muted); }
+.spacebot-composer textarea:disabled { opacity: .5; }
+.spacebot .spacebot-send { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex-shrink: 0; border: 0; border-radius: 6px; background: var(--spacebot-accent); color: #fff; }
+.spacebot .spacebot-send:hover:not(:disabled), .spacebot .spacebot-action:hover:not(:disabled) { background: var(--spacebot-accent-hover); }
+.spacebot-composer-meta { display: flex; justify-content: flex-end; margin-top: 8px; font-size: 11px; color: #94a3b8; }
+.spacebot .spacebot-link { border: 0; padding: 4px 0; background: none; color: #a5b4fc; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; margin-right: 12px; }
+.spacebot-error { margin: 0 0 8px; font-size: 12px; color: #fca5a5; }
+.spacebot-limit, .spacebot-progress { margin: 0 0 8px; font-size: 13px; color: var(--spacebot-muted); }
+.spacebot-progress { display: flex; gap: 8px; align-items: center; }
+.spacebot-progress svg { width: 16px; height: 16px; }
+.spacebot .spacebot-action { padding: 10px 14px; border: 0; border-radius: 6px; background: var(--spacebot-accent); color: #fff; }
+.spacebot-terminal { display: flex; min-height: 100%; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+.spacebot-terminal-robot { width: 64px; height: 64px; opacity: .7; filter: grayscale(1); }
+.spacebot-terminal h3 { font: 600 20px/1.4 var(--spacebot-heading-font); margin: 16px 0 8px; }
+.spacebot-terminal p { max-width: 320px; margin: 0 0 20px; color: var(--spacebot-muted); }
+.spacebot .spacebot-launcher { position: relative; display: flex; align-items: center; justify-content: center; width: var(--spacebot-launcher-size); height: var(--spacebot-launcher-size); padding: 6px; border: 0; border-radius: 32px; background: transparent; filter: drop-shadow(0 12px 20px #0f172acc); }
+.spacebot .spacebot-launcher-robot { width: 100%; height: 100%; filter: drop-shadow(0 4px 12px #6366f159); transition: filter 200ms; }
+.spacebot-launcher:hover .spacebot-launcher-robot { filter: drop-shadow(0 4px 18px #67e8f980); }
+.spacebot-launcher .spacebot-status { width: 14px; height: 14px; right: -4px; top: -4px; }
+.spacebot-tooltip { pointer-events: none; position: absolute; top: var(--sb-tip-top); bottom: var(--sb-tip-bottom); left: var(--sb-tip-left); right: var(--sb-tip-right); translate: 0 var(--sb-tip-translate); max-width: min(240px, calc(100vw - 128px)); width: max-content; padding: 8px 12px; border: 1px solid #67e8f94d; border-radius: 8px; background: #020617f2; color: #cffafe; font-size: 12px; font-weight: 600; opacity: 0; transition: opacity 200ms; overflow-wrap: anywhere; }
+.spacebot-launcher:hover .spacebot-tooltip, .spacebot-launcher:focus-visible .spacebot-tooltip { opacity: 1; }
+.spacebot-spin { animation: spacebot-spin 1s linear infinite; }
+@keyframes spacebot-spin { to { transform: rotate(360deg); } }
+@keyframes spacebot-pulse { 50% { opacity: .35; } }
+@media (max-width: 639px) {
+  .spacebot-position { top: var(--sb-mobile-top); bottom: var(--sb-mobile-bottom); left: var(--sb-mobile-left); right: var(--sb-mobile-right); translate: 0 var(--sb-mobile-translate); --sb-tip-left: var(--sb-mobile-tip-left); --sb-tip-right: var(--sb-mobile-tip-right); --sb-tip-top: var(--sb-mobile-tip-top); --sb-tip-bottom: var(--sb-mobile-tip-bottom); --sb-tip-translate: var(--sb-mobile-translate); }
+  .spacebot-panel-position { width: calc(100% - 24px); }
+  .spacebot .spacebot-launcher { width: var(--spacebot-mobile-launcher-size); height: var(--spacebot-mobile-launcher-size); padding: 4px; }
+  .spacebot-composer textarea { font-size: 16px; }
+}
+@supports (bottom: env(safe-area-inset-bottom)) {
+  .spacebot-position { margin-bottom: env(safe-area-inset-bottom); margin-top: env(safe-area-inset-top); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spacebot *, .spacebot *::before, .spacebot *::after { animation: none !important; transition: none !important; }
+}
