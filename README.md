@@ -22,9 +22,9 @@ A configurable React chatbot with an animated robot, streaming responses, option
 
 ## Demo
 
-![Spacebot demo: a live Spacy conversation about customer-support automation on VectorSpace](docs/assets/spacebot-demo.gif)
+![Spacebot demo: the floating Spacy robot, its hover label, and a live conversation opened from the icon](docs/assets/spacebot-demo.gif)
 
-A fresh conversation with Spacy, Spacebot’s VectorSpace personality, about customer-support automation. Recorded on [VectorSpace](https://vectorspace.com.au) using its live assistant.
+Watch Spacy’s floating robot wave, hover to reveal the chat label, then click the icon to start a live conversation about customer-support automation. Recorded on [VectorSpace](https://vectorspace.com.au) using its live assistant.
 
 ## Quick start
 
