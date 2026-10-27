@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Motion-Animated-FFF312?logo=framer&amp;logoColor=black" alt="Motion animations" />
 </p>
 
-<p align="center"><a href="#quick-start">Quick start</a> · <a href="#configuration">Configuration</a> · <a href="#connect-your-services">Integrations</a> · <a href="#development">Development</a></p>
+<p align="center"><a href="#demo">Demo</a> · <a href="#quick-start">Quick start</a> · <a href="#configuration">Configuration</a> · <a href="#connect-your-services">Integrations</a> · <a href="#development">Development</a></p>
 
 # Spacebot
 
@@ -19,6 +19,12 @@ A configurable React chatbot with an animated robot, streaming responses, option
 - 🎨 Scoped CSS, configurable placement and copy, and no Tailwind requirement.
 - 🔌 Replaceable transports for your assistant, lead intake, and transcript delivery.
 - 📦 Typed ESM package, ready to build and install as an npm tarball.
+
+## Demo
+
+![Spacebot demo: a live Spacy conversation about customer-support automation on VectorSpace](docs/assets/spacebot-demo.gif)
+
+A fresh conversation with Spacy, Spacebot’s VectorSpace personality, about customer-support automation. Recorded on [VectorSpace](https://vectorspace.com.au) using its live assistant.
 
 ## Quick start
 
