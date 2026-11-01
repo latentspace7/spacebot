@@ -1,4 +1,4 @@
-import type { SpacebotCopy } from './types'
+import type { SpacebotCopy, SpacebotVoiceCopy } from './types'
 
 export const defaultCopy: SpacebotCopy = {
   placeholder: 'How can I help you?',
@@ -16,7 +16,55 @@ export const defaultCopy: SpacebotCopy = {
   limitMessage: 'This conversation has reached its message limit.',
   sendLabel: 'Send message',
   unavailableMessage: 'The assistant is temporarily unavailable. Please try again.',
+  noBackendMessage: 'No backend is connected yet. Connect your chat endpoint to start talking. See the Spacebot backend guide (docs/backend.md) for a minimal example.',
   deliveryError: 'Your conversation could not be sent. It has been kept here so you can retry.',
   interruptedMessage: 'The response was interrupted.',
   leadSuccess: (name, canContinue) => `Thank you, ${name}. Your details and conversation have been sent to the team.${canContinue ? ' Is there anything else I can help you with?' : ' Someone will be in touch shortly.'}`,
+}
+
+export function defaultVoiceCopy(title: string): SpacebotVoiceCopy {
+  return {
+    unsupported: 'Voice needs a browser with microphone support on HTTPS. Please use chat on this device.',
+    microphoneDenied: 'Microphone access was declined. Allow it in your browser to talk, or continue in chat.',
+    connectTimeout: 'The voice connection timed out. Please try again or use chat.',
+    connectionLost: 'The voice connection was lost. You can continue in chat.',
+    connectionEnded: 'The voice connection ended. You can continue in chat.',
+    unreadable: 'The voice connection could not be read. Please use chat.',
+    unavailable: 'Voice is temporarily unavailable. Please use chat.',
+    noBackend: 'No voice backend is connected yet. See the Spacebot backend guide (docs/backend.md) to add a voice endpoint.',
+    failed: `${title} could not continue this voice conversation. Please use chat.`,
+    lost: `${title} lost the voice connection. Please continue in chat.`,
+    ended: `Thanks for talking with ${title}. You can keep going in chat.`,
+    timeUp: 'Thanks for talking. This call has ended, but we can keep going in chat.',
+    restricted: 'This conversation has ended because requests were outside the assistant’s purpose.',
+    idleStatus: 'A little conversation. A clear next step.',
+    connectingStatus: `Connecting to ${title}…`,
+    speakingStatus: `${title} is speaking`,
+    thinkingStatus: 'Thinking it through',
+    listeningStatus: `${title} is listening`,
+    mutedStatus: 'Microphone muted',
+    endedStatus: 'Conversation ended',
+    liveLabel: 'Live conversation',
+    idleLabel: `Voice with ${title}`,
+    remainingLabel: (seconds) => `${seconds} seconds remaining`,
+    warningNotice: 'About 15 seconds left. We can keep going in chat.',
+    enablePlayback: `Enable ${title}’s voice`,
+    retry: 'Try voice again',
+    cancel: 'Cancel',
+    end: 'End conversation',
+    mute: 'Mute microphone',
+    unmute: 'Unmute microphone',
+    continueInChat: 'Continue in chat',
+    preferChat: `Prefer typing? Chat with ${title}`,
+    activeDisclosure: 'You can interrupt naturally. Your microphone turns off when the call ends.',
+    connectingDisclosure: `Connecting your microphone and ${title}’s voice…`,
+    idleDisclosure: 'Your microphone is off.',
+    talkLabel: `Talk to ${title}`,
+    backLabel: 'Back to chat',
+    namePrompt: 'Before we talk, what should I call you?',
+    namePlaceholder: 'Your name',
+    nameError: 'Please enter your name using letters, spaces, apostrophes, or hyphens.',
+    startLabel: 'Start voice call',
+    privacyNotice: '',
+  }
 }

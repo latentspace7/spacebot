@@ -154,6 +154,16 @@ describe('widget behavior', () => {
     expect(renderToString(<Spacebot transport={transport} />)).toBe('')
     expect(renderToString(<SpacebotRobot />)).toContain('<svg')
   })
+  it('applies the dark theme by default and the light theme on request', async () => {
+    const { unmount } = render(<Spacebot storage={false} transport={transport} />)
+    expect((await screen.findByRole('button', { name: 'Open Spacebot chat' })).closest('.spacebot')?.getAttribute('data-theme')).toBe('dark')
+    unmount()
+    render(<Spacebot storage={false} theme="light" transport={transport} />)
+    expect((await screen.findByRole('button', { name: 'Open Spacebot chat' })).closest('.spacebot')?.getAttribute('data-theme')).toBe('light')
+  })
+  it('paints the robot cape from a theme variable with a default', () => {
+    expect(renderToString(<SpacebotRobot reduceMotion />)).toContain('var(--spacebot-robot-cape, #6a45e4)')
+  })
   it('recovers an interrupted legacy stream without losing its user message', async () => {
     const previous = stored('streaming')
     previous.messages.push({ id: crypto.randomUUID(), role: 'user', content: 'Keep my question' }, { id: crypto.randomUUID(), role: 'assistant', content: '' })

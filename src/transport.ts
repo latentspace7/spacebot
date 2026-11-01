@@ -1,8 +1,26 @@
-import { deliverySchema, leadIntakeSchema, streamEventSchema } from './contracts'
-import type { ChatMessage, ChatStreamEvent, SpacebotTransport, TranscriptRequest } from './types'
+import { deliverySchema, leadIntakeSchema, streamEventSchema, voiceEventTypes, voiceServerEventSchema } from './contracts'
+import type { ChatMessage, ChatStreamEvent, SpacebotTransport, SpacebotVoiceTransport, TranscriptRequest, VoiceServerEvent } from './types'
 
 export class SpacebotError extends Error {
   constructor(public code: string, message: string) { super(message); this.name = 'SpacebotError' }
+}
+
+export const NO_BACKEND = 'NO_BACKEND'
+const NO_BACKEND_STATUSES = new Set([404, 405, 501])
+
+export function noBackendError(): SpacebotError {
+  return new SpacebotError(NO_BACKEND, 'No backend is connected. See the Spacebot backend guide to set one up.')
+}
+
+async function backendFetch(requestFetch: typeof fetch, url: string, init: RequestInit): Promise<Response> {
+  let response: Response
+  try { response = await requestFetch(url, init) } catch (cause) {
+    if (cause instanceof DOMException && cause.name === 'AbortError') throw cause
+    if (init.signal?.aborted) throw cause
+    throw noBackendError()
+  }
+  if (NO_BACKEND_STATUSES.has(response.status) || (response.ok && response.headers.get('content-type')?.includes('text/html'))) throw noBackendError()
+  return response
 }
 
 export type HttpTransportOptions = {
@@ -71,7 +89,7 @@ export function createHttpTransport(options: HttpTransportOptions): SpacebotTran
     return result
   }
   const post = async (url: string, body: unknown, signal: AbortSignal): Promise<Response> => {
-    const response = await requestFetch(url, { method: 'POST', headers: await headers(), credentials: options.credentials ?? 'same-origin', body: JSON.stringify(body), signal })
+    const response = await backendFetch(requestFetch, url, { method: 'POST', headers: await headers(), credentials: options.credentials ?? 'same-origin', body: JSON.stringify(body), signal })
     if (!response.ok) {
       const payload: unknown = await response.json().catch(() => null)
       const error = typeof payload === 'object' && payload !== null ? payload : {}
@@ -111,4 +129,71 @@ export function createHttpTransport(options: HttpTransportOptions): SpacebotTran
     }
   }
   return transport
+}
+
+export type HttpVoiceTransportOptions = {
+  endpoint: string
+  headers?: HeadersInit | (() => HeadersInit | Promise<HeadersInit>)
+  credentials?: RequestCredentials
+  fetch?: typeof globalThis.fetch
+}
+
+const knownVoiceEvents = new Set<string>(voiceEventTypes)
+
+export async function consumeVoiceStream(stream: ReadableStream<Uint8Array>, onEvent: (event: VoiceServerEvent) => void | Promise<void>, signal?: AbortSignal): Promise<void> {
+  const reader = stream.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  const consume = async (frame: string): Promise<void> => {
+    const data = frame.split(/\r?\n/).filter((line) => line.startsWith('data:')).map((line) => line.slice(5).trimStart()).join('\n')
+    if (!data) return
+    let raw: unknown
+    try { raw = JSON.parse(data) } catch { throw new SpacebotError('INVALID_STREAM', 'The service returned an invalid voice event.') }
+    const type = typeof raw === 'object' && raw !== null && 'type' in raw ? raw.type : undefined
+    if (typeof type !== 'string' || !knownVoiceEvents.has(type)) return
+    const parsed = voiceServerEventSchema.safeParse(raw)
+    if (!parsed.success) throw new SpacebotError('INVALID_STREAM', 'The service returned an invalid voice event.')
+    await onEvent(parsed.data)
+  }
+  try {
+    while (!signal?.aborted) {
+      const { value, done } = await reader.read()
+      buffer += decoder.decode(value, { stream: !done })
+      if (buffer.length > 1_000_000) throw new SpacebotError('INVALID_STREAM', 'The voice event is too large.')
+      let boundary: RegExpExecArray | null
+      while ((boundary = /\r?\n\r?\n/.exec(buffer))) {
+        const frame = buffer.slice(0, boundary.index)
+        buffer = buffer.slice(boundary.index + boundary[0].length)
+        await consume(frame)
+      }
+      if (done) {
+        if (buffer.trim()) await consume(buffer)
+        break
+      }
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined)
+    reader.releaseLock()
+  }
+}
+
+export function createHttpVoiceTransport(options: HttpVoiceTransportOptions): SpacebotVoiceTransport {
+  const requestFetch: typeof fetch = (...args) => (options.fetch ?? globalThis.fetch)(...args)
+  return {
+    async connect(request, { signal, onEvent }) {
+      const headers = new Headers(typeof options.headers === 'function' ? await options.headers() : options.headers)
+      headers.set('Content-Type', 'application/json')
+      const body = { sdp: request.sdp, ...(request.name ? { name: request.name } : {}) }
+      const response = await backendFetch(requestFetch, options.endpoint, { method: 'POST', headers, credentials: options.credentials ?? 'same-origin', body: JSON.stringify(body), signal })
+      if (!response.ok) {
+        const payload: unknown = await response.json().catch(() => null)
+        const error = typeof payload === 'object' && payload !== null ? payload : {}
+        const code = 'code' in error && typeof error.code === 'string' ? error.code : `HTTP_${response.status}`
+        const message = 'message' in error && typeof error.message === 'string' ? error.message : ''
+        throw new SpacebotError(code, message)
+      }
+      if (!response.body) throw new SpacebotError('MISSING_STREAM', '')
+      await consumeVoiceStream(response.body, onEvent, signal)
+    },
+  }
 }

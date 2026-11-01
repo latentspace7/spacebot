@@ -1,11 +1,15 @@
 import { StrictMode, useState } from 'react'
 import { createRoot } from 'react-dom/client'
-import { Spacebot, SpacebotRobot } from '../src'
+import { createHttpTransport, createHttpVoiceTransport, Spacebot, SpacebotRobot } from '../src'
 import type { SpacebotEvent, SpacebotPosition, SpacebotTransport } from '../src'
 import '../src/styles.css'
 import './demo.css'
 
-const transport: SpacebotTransport = {
+// No backend runs alongside the demo, so these HTTP transports report the missing backend.
+const missingBackend = createHttpTransport({ endpoints: { chat: '/api/chat' } })
+const voiceTransport = createHttpVoiceTransport({ endpoint: '/api/voice' })
+
+const mockTransport: SpacebotTransport = {
   async chat(request, { signal, onEvent }) {
     signal.throwIfAborted()
     onEvent({ type: 'delta', text: `You said: **${request.message}**\n\nThis demo runs locally. Connect a transport to use your own assistant, service, or application API.` })
@@ -26,6 +30,8 @@ function Demo() {
   const [position, setPosition] = useState<SpacebotPosition>('bottom-right')
   const [title, setTitle] = useState('Spacebot')
   const [open, setOpen] = useState(false)
+  const [theme, setTheme] = useState<'dark' | 'light'>('dark')
+  const [backend, setBackend] = useState<'mocked' | 'none'>('mocked')
   const [eventType, setEventType] = useState('Waiting for a conversation')
   const onEvent = (event: SpacebotEvent): void => { setEventType(event.type) }
   return (
@@ -36,10 +42,12 @@ function Demo() {
       <div className="demo-controls">
         <label>Assistant title<input value={title} onChange={(event) => setTitle(event.target.value)} /></label>
         <label>Placement<select value={position} onChange={(event) => setPosition(event.target.value as SpacebotPosition)}>{(['bottom-right', 'bottom-left', 'top-right', 'top-left', 'center-right', 'center-left'] as const).map((value) => <option key={value}>{value}</option>)}</select></label>
+        <label>Backend<select value={backend} onChange={(event) => setBackend(event.target.value as 'mocked' | 'none')}><option value="mocked">mocked</option><option value="none">none</option></select></label>
+        <label>Theme<select value={theme} onChange={(event) => setTheme(event.target.value as 'dark' | 'light')}><option>dark</option><option>light</option></select></label>
         <button type="button" onClick={() => setOpen(true)}>Start a conversation ↗</button>
       </div>
-      <div className="demo-notes"><p><strong>Self-contained styling</strong><br />This page has no Tailwind or application UI framework.</p><p><strong>Pluggable services</strong><br />Mock responses only. No network calls or email delivery.</p><p><strong>Structured events</strong><br /><code>{eventType}</code></p></div>
-      <Spacebot title={title} subtitle="Local demo assistant" transport={transport} open={open} onOpenChange={setOpen} onEvent={onEvent} storage={false} placement={{ launcher: { position }, panel: { position, offsetY: 24 }, mobile: { launcher: { position }, panel: { position, offsetY: 24 } } }} />
+      <div className="demo-notes"><p><strong>Self-contained styling</strong><br />This page has no Tailwind or application UI framework.</p><p><strong>Pluggable services</strong><br />Mocked chat only. Choose “none” to see the missing-backend message; voice needs a real backend.</p><p><strong>Structured events</strong><br /><code>{eventType}</code></p></div>
+      <Spacebot title={title} theme={theme} subtitle="Local demo assistant" transport={backend === 'mocked' ? mockTransport : missingBackend} voice={{ transport: voiceTransport }} open={open} onOpenChange={setOpen} onEvent={onEvent} storage={false} placement={{ launcher: { position }, panel: { position, offsetY: 24 }, mobile: { launcher: { position }, panel: { position, offsetY: 24 } } }} />
     </main>
   )
 }

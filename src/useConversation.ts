@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { deliverySchema, leadIntakeSchema, streamEventSchema } from './contracts'
 import { apiMessages, createSession, EMPTY_LEAD, isLeadPhase, loadSession, recoverInterruptedMessages, saveSession, transcriptRequest } from './session'
-import { SpacebotError } from './transport'
+import { NO_BACKEND, SpacebotError } from './transport'
 import type { ChatMessage, ChatStreamEvent, ConversationSnapshot, SpacebotCopy, SpacebotEvent, SpacebotProps } from './types'
 
 type ConversationOptions = SpacebotProps & { greeting: string; resolvedCopy: SpacebotCopy }
@@ -88,7 +88,7 @@ export function useConversation(options: ConversationOptions) {
 
   const fail = (cause: unknown, operation: 'chat' | 'lead' | 'transcript', current: ConversationSnapshot): void => {
     const code = cause instanceof SpacebotError ? cause.code : 'REQUEST_FAILED'
-    const text = operation === 'transcript' ? options.resolvedCopy.deliveryError : cause instanceof SpacebotError ? cause.message : options.resolvedCopy.unavailableMessage
+    const text = code === NO_BACKEND ? options.resolvedCopy.noBackendMessage : operation === 'transcript' ? options.resolvedCopy.deliveryError : cause instanceof SpacebotError ? cause.message : options.resolvedCopy.unavailableMessage
     setError(text)
     emit({ type: 'error', operation, code, message: text, conversation: current })
   }

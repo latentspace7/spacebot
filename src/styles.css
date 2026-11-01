@@ -97,10 +97,92 @@
 .spacebot .spacebot-launcher { position: relative; display: flex; align-items: center; justify-content: center; width: var(--spacebot-launcher-size); height: var(--spacebot-launcher-size); padding: 6px; border: 0; border-radius: 32px; background: transparent; filter: drop-shadow(0 12px 20px #0f172acc); }
 .spacebot .spacebot-launcher-robot { width: 100%; height: 100%; filter: drop-shadow(0 4px 12px #6366f159); transition: filter 200ms; }
 .spacebot-launcher:hover .spacebot-launcher-robot { filter: drop-shadow(0 4px 18px #67e8f980); }
-.spacebot-launcher .spacebot-status { width: 14px; height: 14px; right: -4px; top: -4px; }
+.spacebot-launcher .spacebot-status { width: 14px; height: 14px; right: 23%; top: 10%; }
 .spacebot-tooltip { pointer-events: none; position: absolute; top: var(--sb-tip-top); bottom: var(--sb-tip-bottom); left: var(--sb-tip-left); right: var(--sb-tip-right); translate: 0 var(--sb-tip-translate); max-width: min(240px, calc(100vw - 128px)); width: max-content; padding: 8px 12px; border: 1px solid #67e8f94d; border-radius: 8px; background: #020617f2; color: #cffafe; font-size: 12px; font-weight: 600; opacity: 0; transition: opacity 200ms; overflow-wrap: anywhere; }
 .spacebot-launcher:hover .spacebot-tooltip, .spacebot-launcher:focus-visible .spacebot-tooltip { opacity: 1; }
 .spacebot-spin { animation: spacebot-spin 1s linear infinite; }
+.spacebot[data-theme='light'] {
+  --spacebot-accent: #6a45e4;
+  --spacebot-accent-hover: #5b37d8;
+  --spacebot-surface: #fbfafff5;
+  --spacebot-bubble: #ffffff;
+  --spacebot-border: #e2dcf0;
+  --spacebot-text: #1d1930;
+  --spacebot-muted: #6b6585;
+  --spacebot-focus: #6a45e4;
+  color-scheme: light;
+}
+.spacebot[data-theme='light'] .spacebot-panel { border-color: #d9cff5; box-shadow: 0 24px 90px -20px #3d249966; }
+.spacebot[data-theme='light'] .spacebot-header { background: linear-gradient(to right, #efe9ff, #fbfaff); }
+.spacebot[data-theme='light'] .spacebot-avatar { border-color: #6a45e433; background: linear-gradient(135deg, #6a45e41f, #a78bfa14); }
+.spacebot[data-theme='light'] .spacebot-status { border-color: #fbfaff; }
+.spacebot[data-theme='light'] .spacebot-heading h2, .spacebot[data-theme='light'] .spacebot-bubble strong { color: var(--spacebot-text); }
+.spacebot[data-theme='light'] .spacebot-heading h2 svg { color: var(--spacebot-accent); }
+.spacebot[data-theme='light'] .spacebot-close:hover { background: #efeaf9; color: var(--spacebot-text); }
+.spacebot[data-theme='light'] .spacebot-message-user .spacebot-bubble { background: var(--spacebot-accent); }
+.spacebot[data-theme='light'] .spacebot-message-user .spacebot-bubble strong { color: #fff; }
+.spacebot[data-theme='light'] .spacebot-typing i { background: #7c5cf0; }
+.spacebot[data-theme='light'] .spacebot-footer { background: #ffffff; }
+.spacebot[data-theme='light'] .spacebot-composer textarea { border-color: #ddd5ee; background: #fbfaff; }
+.spacebot[data-theme='light'] .spacebot-composer-meta { color: #7a7394; }
+.spacebot[data-theme='light'] .spacebot-link { color: var(--spacebot-accent-hover); }
+.spacebot[data-theme='light'] .spacebot-error { color: #c2334a; }
+.spacebot[data-theme='light'] .spacebot-launcher { filter: drop-shadow(0 14px 22px #3d249940); }
+.spacebot[data-theme='light'] .spacebot-launcher-robot { filter: drop-shadow(0 4px 12px #6a45e433); }
+.spacebot[data-theme='light'] .spacebot-launcher:hover .spacebot-launcher-robot { filter: drop-shadow(0 4px 16px #a78bfa99); }
+.spacebot[data-theme='light'] .spacebot-tooltip { border-color: #6a45e433; background: #fffffff5; color: #3d2499; box-shadow: 0 8px 20px -12px #3d249966; }
+.spacebot-talk svg { width: 18px; height: 18px; }
+.spacebot-voice-view { display: flex; flex-direction: column; justify-content: center; }
+.spacebot-voice-start { display: grid; gap: 12px; text-align: left; }
+.spacebot .spacebot-voice-start-robot { width: 112px; height: 112px; margin: 0 auto 8px; }
+.spacebot-voice-start label { font-size: 13px; color: var(--spacebot-text); }
+.spacebot-voice-start input { width: 100%; padding: 12px 14px; border: 1px solid #334155; border-radius: 10px; background: #0f172acc; color: var(--spacebot-text); font: inherit; }
+.spacebot-voice-start input:focus-visible { outline: 2px solid var(--spacebot-focus); outline-offset: 2px; }
+.spacebot-voice-start input::placeholder { color: var(--spacebot-muted); }
+.spacebot-voice-start .spacebot-error { margin: 0; }
+.spacebot-voice { padding: 8px 4px 4px; text-align: center; background: transparent; }
+.spacebot-voice-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--spacebot-muted); }
+.spacebot-voice-meta > span { display: inline-flex; align-items: center; gap: 7px; }
+.spacebot-voice-meta > span:last-child { font-variant-numeric: tabular-nums; }
+.spacebot-voice-meta svg { width: 14px; height: 14px; }
+.spacebot-voice-dot { width: 6px; height: 6px; border-radius: 50%; background: #64748b; }
+.spacebot-voice-dot.is-active { background: #34d399; box-shadow: 0 0 10px #34d39960; }
+.spacebot-voice-warning, .spacebot-voice-notice { color: #fbbf24; }
+.spacebot-voice-orbit { display: grid; position: relative; place-items: center; width: 196px; height: 196px; margin: 20px auto 10px; }
+.spacebot-voice-ring { position: absolute; inset: 16px; border: 1px solid #818cf833; border-radius: 50%; background: radial-gradient(circle, #6366f126, transparent 70%); transition: transform 150ms, border-color 150ms; }
+.spacebot-voice-ring-outer { inset: 0; border-color: #818cf817; background: transparent; }
+.spacebot-voice-orbit.is-active .spacebot-voice-ring { animation: spacebot-breathe 4s ease-in-out infinite; }
+.spacebot-voice-orbit.is-speaking .spacebot-voice-ring { animation: none; transform: scale(calc(1 + var(--spacebot-voice-level) * .12)); border-color: #a5b4fc99; }
+.spacebot .spacebot-voice-robot { position: relative; width: 132px; height: 132px; filter: drop-shadow(0 10px 22px #0000004d); }
+.spacebot-voice-status { margin: 8px 0; font: 500 16px/1.4 var(--spacebot-heading-font); letter-spacing: -.02em; }
+.spacebot-voice-wave { display: flex; justify-content: center; align-items: center; gap: 4px; height: 34px; margin: 6px 0 10px; }
+.spacebot-voice-wave span { width: 3px; min-height: 4px; border-radius: 8px; background: var(--spacebot-accent-hover); transition: height 100ms; }
+.spacebot-voice-notice { margin: 0 0 16px; font-size: 12px; line-height: 1.6; }
+.spacebot-voice-message { margin: 0 0 20px; font-size: 13px; line-height: 1.7; color: var(--spacebot-muted); }
+.spacebot-voice-actions { display: flex; justify-content: center; gap: 10px; }
+.spacebot .spacebot-voice-primary, .spacebot .spacebot-voice-end, .spacebot .spacebot-voice-mute, .spacebot .spacebot-voice-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 48px; padding: 12px 18px; border: 1px solid transparent; border-radius: 12px; font-size: 13px; }
+.spacebot .spacebot-voice-primary { width: 100%; background: var(--spacebot-accent); color: #fff; }
+.spacebot .spacebot-voice-primary:hover { background: var(--spacebot-accent-hover); }
+.spacebot .spacebot-voice-end { flex: 1; color: #fecdd3; background: #4c1d2e; border-color: #9f123955; }
+.spacebot .spacebot-voice-end:hover { background: #641e38; }
+.spacebot .spacebot-voice-mute { color: var(--spacebot-text); background: #1e293b; }
+.spacebot .spacebot-voice-mute[aria-pressed='true'] { color: #fecdd3; background: #4c1d2e; }
+.spacebot .spacebot-voice-secondary { width: 100%; margin-bottom: 12px; color: var(--spacebot-text); background: var(--spacebot-bubble); border-color: var(--spacebot-border); }
+.spacebot .spacebot-voice-chat { display: inline-flex; justify-content: center; align-items: center; gap: 8px; width: 100%; margin: 14px 0 0; padding: 10px 2px; border: 0; background: transparent; color: var(--spacebot-accent-hover); font-size: 12px; }
+.spacebot-voice-disclosure { margin: 14px 0 0; color: var(--spacebot-muted); font-size: 10px; line-height: 1.7; }
+.spacebot[data-theme='light'] .spacebot-voice-start input { border-color: #ddd5ee; background: #ffffff; }
+.spacebot[data-theme='light'] .spacebot-voice-dot { background: #b9b3cc; }
+.spacebot[data-theme='light'] .spacebot-voice-dot.is-active { background: #22b38a; box-shadow: 0 0 10px #22b38a60; }
+.spacebot[data-theme='light'] .spacebot-voice-warning, .spacebot[data-theme='light'] .spacebot-voice-notice { color: #b7791f; }
+.spacebot[data-theme='light'] .spacebot-voice-ring { border-color: #6a45e433; background: radial-gradient(circle, #a78bfa2e, transparent 70%); }
+.spacebot[data-theme='light'] .spacebot-voice-ring-outer { border-color: #6a45e41a; background: transparent; }
+.spacebot[data-theme='light'] .spacebot-voice-orbit.is-speaking .spacebot-voice-ring { border-color: #6a45e4aa; }
+.spacebot[data-theme='light'] .spacebot-voice-robot { filter: drop-shadow(0 10px 22px #3d249940); }
+.spacebot[data-theme='light'] .spacebot-voice-end { color: #b4233c; background: #fde8ec; border-color: #f3b8c3; }
+.spacebot[data-theme='light'] .spacebot-voice-end:hover { background: #fbd5dd; }
+.spacebot[data-theme='light'] .spacebot-voice-mute { background: #efeaf9; }
+.spacebot[data-theme='light'] .spacebot-voice-mute[aria-pressed='true'] { color: #b4233c; background: #fde8ec; }
+@keyframes spacebot-breathe { 50% { transform: scale(1.04); opacity: .6; } }
 @keyframes spacebot-spin { to { transform: rotate(360deg); } }
 @keyframes spacebot-pulse { 50% { opacity: .35; } }
 @media (max-width: 639px) {

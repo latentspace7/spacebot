@@ -9,23 +9,31 @@ export type SpacebotRobotProps = {
   reduceMotion?: boolean | null
 }
 
-const WAVE_DURATION = 2.4
-const WAVE_REPEAT_DELAY = 0.9
+const CAPE = 'var(--spacebot-robot-cape, #6a45e4)'
+const JOINT = '#24212e'
+const EDGE = '#cfc9dc'
+const CAPE_PATH = 'M46 64C60 58 86 56 112 52c-6 10 2 22-6 32 2 4-6 10-10 8-8 4-16-2-24 2-6-6-16-10-24-14Z'
+
+function Limb({ d }: { d: string }): JSX.Element {
+  return (
+    <>
+      <path d={d} stroke={EDGE} strokeWidth="8.6" strokeLinecap="round" strokeLinejoin="round" />
+      <path d={d} stroke="#f8f7fc" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" />
+    </>
+  )
+}
 
 export function SpacebotRobot({ className, style, waving = false, reduceMotion }: SpacebotRobotProps): JSX.Element {
-  const id = useId()
+  const id = useId().replace(/[^a-zA-Z0-9_-]/g, '')
   const preference = useReducedMotion()
-  const shouldWave = waving && !(reduceMotion ?? preference)
-  const waveTransition = {
-    duration: WAVE_DURATION,
-    repeat: Infinity,
-    repeatDelay: WAVE_REPEAT_DELAY,
-    ease: 'easeInOut' as const,
-  }
+  const animate = !(reduceMotion ?? preference)
+  const shouldWave = waving && animate
+  const shell = `url(#${id}-shell)`
+  const glow = `url(#${id}-glow)`
 
   return (
     <svg
-      viewBox="0 0 64 64"
+      viewBox="0 0 120 120"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={`spacebot-robot ${className ?? ''}`}
@@ -33,98 +41,89 @@ export function SpacebotRobot({ className, style, waving = false, reduceMotion }
       aria-hidden="true"
     >
       <defs>
-        <linearGradient id={`${id}-shell`} x1="15" y1="12" x2="48" y2="44" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#e2eaff" />
-          <stop offset="0.24" stopColor="#a7b9fb" />
-          <stop offset="0.58" stopColor="#7384dc" />
-          <stop offset="0.84" stopColor="#6661b1" />
-          <stop offset="1" stopColor="#9b93de" />
+        <linearGradient id={`${id}-shell`} x1="0.2" y1="0" x2="0.8" y2="1">
+          <stop stopColor="#ffffff" />
+          <stop offset="0.55" stopColor="#efedf5" />
+          <stop offset="1" stopColor="#c9c4d8" />
         </linearGradient>
-        <linearGradient id={`${id}-body`} x1="23" y1="43" x2="40" y2="61" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#b3c4ff" />
-          <stop offset="0.35" stopColor="#7c8ddd" />
-          <stop offset="0.8" stopColor="#57599e" />
-          <stop offset="1" stopColor="#8583c6" />
+        <linearGradient id={`${id}-cape-shade`} x1="0" y1="0" x2="1" y2="1">
+          <stop stopColor="#ffffff" stopOpacity="0.28" />
+          <stop offset="0.45" stopColor="#ffffff" stopOpacity="0" />
+          <stop offset="1" stopColor="#000000" stopOpacity="0.32" />
         </linearGradient>
-        <radialGradient id={`${id}-glass`} cx="0" cy="0" r="1" gradientTransform="translate(23 19) rotate(49) scale(30 35)" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#213856" />
-          <stop offset="0.5" stopColor="#0b192d" />
-          <stop offset="1" stopColor="#030b1a" />
-        </radialGradient>
-        <linearGradient id={`${id}-reflection`} x1="20" y1="17" x2="39" y2="33" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#c1e1ff" stopOpacity="0.24" />
-          <stop offset="1" stopColor="#c1e1ff" stopOpacity="0" />
+        <linearGradient id={`${id}-screen`} x1="0" y1="0" x2="0" y2="1">
+          <stop stopColor="#2a2638" />
+          <stop offset="1" stopColor="#07060c" />
         </linearGradient>
-        <linearGradient id={`${id}-limbs`} x1="13" y1="26" x2="54" y2="54" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#e0ebff" />
-          <stop offset="0.5" stopColor="#a0b4f4" />
-          <stop offset="1" stopColor="#716abc" />
-        </linearGradient>
-        <linearGradient id={`${id}-eyes`} x1="32" y1="24" x2="32" y2="31" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#e8feff" />
-          <stop offset="1" stopColor="#65d9f5" />
-        </linearGradient>
+        <filter id={`${id}-glow`} x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="1" result="blur" />
+          <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
       </defs>
 
-      <path d="M32 13V8" stroke="#aabfff" strokeWidth="2" strokeLinecap="round" />
-      <motion.circle
-        cx="32"
-        cy="6.5"
-        r="2.4"
-        fill="#b5f3ff"
-        animate={shouldWave ? { opacity: [1, 0.6, 1] } : undefined}
-        transition={shouldWave ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut' } : undefined}
-      />
-      <circle cx="31.5" cy="5.8" r="0.75" fill="#f4ffff" />
-
-      <path d="M22 46.5L16 51" stroke={`url(#${id}-limbs)`} strokeWidth="5" strokeLinecap="round" />
-      <ellipse cx="14.2" cy="52.1" rx="3.1" ry="3.8" transform="rotate(34 14.2 52.1)" fill={`url(#${id}-shell)`} />
-      <path d="M26.5 41H37.5V46H26.5V41Z" fill="#343d78" />
-      <path d="M21 45.5C21 44.1 22.1 43 23.5 43H40.5C41.9 43 43 44.1 43 45.5V51C43 56 39 60 34 60H30C25 60 21 56 21 51V45.5Z" fill={`url(#${id}-body)`} stroke="#b6c7f4" strokeOpacity="0.55" strokeWidth="0.7" />
-      <path d="M23.5 45H40.5" stroke="#e3eaff" strokeOpacity="0.6" strokeWidth="0.8" strokeLinecap="round" />
-      <rect x="27.5" y="49" width="9" height="4" rx="2" fill="#253360" />
-      <rect x="29" y="50.2" width="6" height="1.4" rx="0.7" fill="#8ae9fb" />
-      <path d="M27 56.5C30 57.8 34 57.8 37 56.5" stroke="#afb8f0" strokeOpacity="0.4" strokeWidth="0.7" strokeLinecap="round" />
-
-      <rect x="8.5" y="24" width="5" height="10" rx="2.5" fill="#6472b9" />
-      <rect x="50.5" y="24" width="5" height="10" rx="2.5" fill="#6472b9" />
-      <rect x="9" y="26" width="1.3" height="5" rx="0.65" fill="#a1e7fb" />
-      <rect x="53.7" y="26" width="1.3" height="5" rx="0.65" fill="#a1e7fb" />
-      <rect x="11" y="12.5" width="42" height="31.5" rx="12" fill={`url(#${id}-shell)`} stroke="#c2d2ff" strokeOpacity="0.7" strokeWidth="0.8" />
-      <path d="M15.5 21C16.5 17.3 19.3 15 23.5 15H39" stroke="#f0f6ff" strokeOpacity="0.65" strokeWidth="1" strokeLinecap="round" />
-      <rect x="15" y="17.5" width="34" height="22" rx="8.5" fill="#293766" />
-      <rect x="15.6" y="18.1" width="32.8" height="20.8" rx="8" fill={`url(#${id}-glass)`} stroke="#0e1c35" strokeWidth="0.8" />
-      <path d="M23.6 18.8H39.5C42.5 18.8 44.8 20.2 46 22.5C35 22.5 28 25.5 16.4 29V26.5C16.4 22.1 19.2 18.8 23.6 18.8Z" fill={`url(#${id}-reflection)`} />
-      <path d="M21 39.4C27 41 38 41 43 39.4" stroke="#d1dbff" strokeOpacity="0.35" strokeWidth="0.65" strokeLinecap="round" />
-
-      <motion.g
-        animate={shouldWave ? { scaleY: [1, 1, 0.15, 1, 1] } : undefined}
-        transition={shouldWave ? { duration: 4.4, times: [0, 0.88, 0.92, 0.96, 1], repeat: Infinity, repeatDelay: 1.6, ease: 'easeInOut' } : undefined}
-        style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
-      >
-        <rect x="23" y="24.5" width="4.2" height="5.8" rx="2.1" fill={`url(#${id}-eyes)`} />
-        <rect x="36.8" y="24.5" width="4.2" height="5.8" rx="2.1" fill={`url(#${id}-eyes)`} />
-      </motion.g>
-      <path d="M28 32.5C30.3 34.3 33.7 34.3 36 32.5" stroke="#a0e6fb" strokeWidth="1.5" strokeLinecap="round" />
-
-      <motion.g
-        animate={shouldWave ? { rotate: [0, -6, 4, -6, 0] } : undefined}
-        transition={shouldWave ? waveTransition : undefined}
-        style={{ transformBox: 'view-box', transformOrigin: '43px 46px' }}
-      >
-        <path d="M43 46L49.5 40" stroke={`url(#${id}-limbs)`} strokeWidth="5" strokeLinecap="round" />
-        <circle cx="43" cy="46" r="2.2" fill="#9cacdf" />
+      <ellipse cx="60" cy="116" rx="20" ry="2.6" fill="#3d2499" fillOpacity="0.14" />
+      <g transform="rotate(-6 60 70)">
         <motion.g
-          animate={shouldWave ? { rotate: [0, -24, 18, -24, 0] } : undefined}
-          transition={shouldWave ? waveTransition : undefined}
-          style={{ transformBox: 'view-box', transformOrigin: '49.5px 40px' }}
+          animate={animate ? { skewY: [0, -5, 0], scaleX: [1, 1.04, 1] } : undefined}
+          transition={animate ? { duration: 2.8, repeat: Infinity, ease: 'easeInOut' } : undefined}
+          style={{ transformBox: 'view-box', transformOrigin: '58px 62px' }}
         >
-          <path d="M49.5 40L53.5 33" stroke={`url(#${id}-limbs)`} strokeWidth="4.6" strokeLinecap="round" />
-          <path d="M50.2 31.5L49.7 29.1C49.5 28.2 50 27.5 50.7 27.4C51.2 27.3 51.8 27.7 52 28.3L52.2 25.2C52.3 24.4 52.9 23.9 53.5 24C54.1 24 54.5 24.6 54.5 25.2L55.3 23.6C55.6 22.9 56.3 22.7 56.9 23C57.5 23.3 57.6 24 57.3 24.6L56.9 26.2L58 25.3C58.6 24.9 59.2 25 59.6 25.5C60 26 59.8 26.7 59.3 27.2L57.2 30.9C56.7 32.4 55.3 33.4 53.9 33.4C52.1 33.4 50.8 32.7 50.2 31.5Z" fill={`url(#${id}-shell)`} stroke="#c2dcff" strokeOpacity="0.65" strokeWidth="0.6" strokeLinejoin="round" />
-          <path d="M53 29.5L54.3 27.7" stroke="#e1edff" strokeOpacity="0.65" strokeWidth="0.7" strokeLinecap="round" />
+          <path d={CAPE_PATH} style={{ fill: CAPE }} />
+          <path d={CAPE_PATH} fill={`url(#${id}-cape-shade)`} stroke="#ffffff" strokeOpacity="0.35" strokeWidth="0.8" />
+          <path d="M74 64c10 6 16 16 14 28M90 60c8 8 12 18 10 28" stroke="#ffffff" strokeOpacity="0.3" strokeWidth="1.2" strokeLinecap="round" />
         </motion.g>
-        <circle cx="49.5" cy="40" r="1.8" fill="#b1c3f4" />
-      </motion.g>
+
+        <Limb d="M53 92l-3 11 7 8" />
+        <Limb d="M63 92l4 10 8 4" />
+        <circle cx="50" cy="103" r="1.9" fill="#a39cb8" />
+        <circle cx="67" cy="102" r="1.9" fill="#a39cb8" />
+        <Limb d="M44 64H34l-10-3" />
+        <circle cx="34" cy="64" r="1.9" fill="#a39cb8" />
+        <rect x="15" y="56.5" width="9" height="8" rx="3.5" fill={shell} stroke={EDGE} strokeWidth="0.8" />
+        <path d="M17 58.5v4M19.5 58.5v4M22 58.5v4" stroke="#bdb6cc" strokeWidth="0.8" strokeLinecap="round" />
+
+        <ellipse cx="58" cy="76" rx="15" ry="17" fill={shell} stroke="#d6d0e3" strokeWidth="0.8" />
+        <motion.rect
+          x="53" y="72" width="10" height="3" rx="1.5" fill="#7fe7ff" filter={glow}
+          animate={animate ? { opacity: [1, 0.55, 1] } : undefined}
+          transition={animate ? { duration: 3, repeat: Infinity, ease: 'easeInOut' } : undefined}
+        />
+        <ellipse cx="58" cy="91.5" rx="10" ry="3.2" fill={JOINT} />
+        <path d="M44 62q14 9 28 0" strokeWidth="4" strokeLinecap="round" style={{ stroke: CAPE }} />
+
+        <motion.g
+          animate={shouldWave ? { rotate: [0, 16, -10, 16, 0] } : undefined}
+          transition={shouldWave ? { duration: 1.7, repeat: Infinity, repeatDelay: 1.1, ease: 'easeInOut' } : undefined}
+          style={{ transformBox: 'view-box', transformOrigin: '72px 64px' }}
+        >
+          <Limb d="M72 64l12-4 10-10" />
+          <circle cx="84" cy="60" r="1.9" fill="#a39cb8" />
+          <path d="M92 45.5l-1-3.2M95 44.5v-3.6M98 45.5l1.2-3M99.5 49l2.6-1.4" stroke={EDGE} strokeWidth="2.6" strokeLinecap="round" />
+          <circle cx="95" cy="49" r="4.6" fill={shell} stroke={EDGE} strokeWidth="0.8" />
+        </motion.g>
+        <circle cx="44" cy="64" r="3.4" fill={JOINT} />
+        <circle cx="72" cy="64" r="3.4" fill={JOINT} />
+        <ellipse cx="58" cy="58" rx="6" ry="2.5" fill={JOINT} />
+
+        <path d="M70 16l6-9" stroke="#d6d0e3" strokeWidth="1.6" strokeLinecap="round" />
+        <circle cx="76.5" cy="6.5" r="2" fill="#ffffff" stroke="#d6d0e3" strokeWidth="0.8" />
+        <circle cx="33.5" cy="36" r="5" fill={shell} stroke="#d6d0e3" strokeWidth="0.8" />
+        <ellipse cx="58" cy="35" rx="25" ry="21" fill={shell} stroke="#d6d0e3" strokeWidth="0.8" />
+        <rect x="39" y="24" width="38" height="21" rx="10.5" fill={`url(#${id}-screen)`} />
+        <path d="M44 27.5c4-1.6 10-2.2 16-2" stroke="#ffffff" strokeOpacity="0.35" strokeWidth="1.6" strokeLinecap="round" />
+        <motion.g
+          filter={glow}
+          animate={animate ? { scaleY: [1, 1, 0.1, 1, 1] } : undefined}
+          transition={animate ? { duration: 4.4, times: [0, 0.88, 0.92, 0.96, 1], repeat: Infinity, repeatDelay: 1.6, ease: 'easeInOut' } : undefined}
+          style={{ transformBox: 'fill-box', transformOrigin: 'center' }}
+        >
+          <path d="M46.5 36.5q4-5 8 0M61.5 36.5q4-5 8 0" stroke="#8fe9ff" strokeWidth="2.4" strokeLinecap="round" />
+        </motion.g>
+        <path d="M54.5 39.5q3.5 3 7 0" stroke="#8fe9ff" strokeWidth="1.8" strokeLinecap="round" filter={glow} />
+        <circle cx="83.5" cy="36" r="7.5" fill={shell} stroke={EDGE} strokeWidth="0.8" />
+        <circle cx="83.5" cy="36" r="5" stroke="#bdb6cc" strokeWidth="0.9" />
+        <circle cx="83.5" cy="36" r="2.6" fill="#e3dff0" stroke="#bdb6cc" strokeWidth="0.8" />
+      </g>
     </svg>
   )
 }

@@ -1,16 +1,23 @@
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
-import { Loader2, Send, Sparkles, X } from 'lucide-react'
+import { ArrowLeft, Loader2, Mic, Send, Sparkles, X } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { defaultCopy } from './copy'
 import { placementStyle } from './placement'
 import { isLeadPhase } from './session'
 import { SpacebotRobot } from './SpacebotRobot'
+import { SpacebotVoice } from './SpacebotVoice'
+import { noBackendError } from './transport'
 import { useConversation } from './useConversation'
+import { useSpacebotVoice } from './useSpacebotVoice'
 import type { JSX } from 'react'
-import type { SpacebotProps } from './types'
+import type { FormEvent } from 'react'
+import type { SpacebotProps, SpacebotVoiceTransport } from './types'
+
+const NAME_PATTERN = /^[\p{L}\p{M}][\p{L}\p{M} .’'-]*$/u
+const missingVoiceTransport: SpacebotVoiceTransport = { connect: async () => { throw noBackendError() } }
 
 function Widget(props: SpacebotProps): JSX.Element | null {
   const title = props.title?.trim() || 'Spacebot'
@@ -21,6 +28,13 @@ function Widget(props: SpacebotProps): JSX.Element | null {
   const [internalOpen, setInternalOpen] = useState(props.defaultOpen ?? false)
   const open = props.open ?? internalOpen
   const reduceMotion = useReducedMotion()
+  const voice = useSpacebotVoice({ transport: props.voice?.transport ?? missingVoiceTransport, title, maxDurationMs: props.voice?.maxDurationMs, copy: props.voice?.copy })
+  const voiceCopy = voice.copy
+  const askName = props.voice?.askName ?? true
+  const [mode, setMode] = useState<'chat' | 'voice'>('chat')
+  const [callerName, setCallerName] = useState('')
+  const [nameError, setNameError] = useState('')
+  const theme = props.theme ?? 'dark'
   const headingId = useId()
   const panelId = useId()
   const inputRef = useRef<HTMLTextAreaElement>(null)
@@ -41,7 +55,16 @@ function Widget(props: SpacebotProps): JSX.Element | null {
   const finish = async (): Promise<void> => {
     if (await end()) changeOpen(false)
   }
+  const leaveVoice = (): void => { voice.reset(); setMode('chat') }
+  const startVoice = (event: FormEvent<HTMLFormElement>): void => {
+    event.preventDefault()
+    const name = callerName.trim()
+    if (askName && (!name || name.length > 80 || !NAME_PATTERN.test(name))) { setNameError(voiceCopy.nameError); return }
+    setNameError('')
+    voice.start(askName ? name : undefined)
+  }
   const close = (): void => {
+    if (mode === 'voice') leaveVoice()
     if (props.closeBehavior === 'end') void finish()
     else changeOpen(false)
   }
@@ -68,7 +91,7 @@ function Widget(props: SpacebotProps): JSX.Element | null {
 
   if (!session) return null
   return createPortal(
-    <div className={`spacebot ${props.className ?? ''}`} style={props.style}>
+    <div className={`spacebot ${props.className ?? ''}`} data-theme={theme} style={props.style}>
       <AnimatePresence>
         {open && (
           <div className="spacebot-position spacebot-panel-position" style={placementStyle(props.placement, 'panel')}>
@@ -90,8 +113,31 @@ function Widget(props: SpacebotProps): JSX.Element | null {
               <header className="spacebot-header">
                 <div className="spacebot-avatar"><SpacebotRobot waving className="spacebot-header-robot" /><span className="spacebot-status" /></div>
                 <div className="spacebot-heading"><h2 id={headingId}>{title}<Sparkles aria-hidden="true" /></h2>{props.subtitle && <p>{props.subtitle}</p>}</div>
+                {props.voice && (mode === 'chat'
+                  ? <button type="button" className="spacebot-close spacebot-talk" onClick={() => setMode('voice')} disabled={busy || terminal} aria-label={voiceCopy.talkLabel} title={voiceCopy.talkLabel}><Mic aria-hidden="true" /></button>
+                  : <button type="button" className="spacebot-close spacebot-talk" onClick={leaveVoice} aria-label={voiceCopy.backLabel} title={voiceCopy.backLabel}><ArrowLeft aria-hidden="true" /></button>)}
                 <button type="button" className="spacebot-close" onClick={close} disabled={phase === 'submittingLead' || phase === 'ending'} aria-label={props.closeBehavior === 'end' ? `End ${title} conversation` : `Minimize ${title}`}><X aria-hidden="true" /></button>
               </header>
+              {mode === 'voice' ? (
+                <div className="spacebot-messages spacebot-voice-view">
+                  {voice.state.phase === 'idle' ? (
+                    <form className="spacebot-voice-start" onSubmit={startVoice}>
+                      <SpacebotRobot className="spacebot-voice-start-robot" waving reduceMotion={reduceMotion} />
+                      {askName && <>
+                        <label htmlFor={`${panelId}-voice-name`}>{voiceCopy.namePrompt}</label>
+                        <input id={`${panelId}-voice-name`} autoComplete="given-name" placeholder={voiceCopy.namePlaceholder} value={callerName} maxLength={80}
+                          aria-invalid={Boolean(nameError)} onChange={(event) => { setCallerName(event.target.value); setNameError('') }} />
+                        {nameError && <p role="alert" className="spacebot-error">{nameError}</p>}
+                      </>}
+                      <button type="submit" className="spacebot-voice-primary"><Mic aria-hidden="true" /> {voiceCopy.startLabel}</button>
+                      {voiceCopy.privacyNotice && <p className="spacebot-voice-disclosure">{voiceCopy.privacyNotice}</p>}
+                    </form>
+                  ) : (
+                    <SpacebotVoice state={voice.state} copy={voiceCopy} theme={theme} onEnd={voice.stop} onMute={voice.toggleMute} onEnablePlayback={voice.enablePlayback}
+                      onRetry={() => voice.start(askName ? callerName.trim() : undefined)} onChat={leaveVoice} />
+                  )}
+                </div>
+              ) : <>
               <div className="spacebot-messages" ref={viewportRef}>
                 {phase === 'restricted' ? (
                   <div className="spacebot-terminal"><SpacebotRobot className="spacebot-terminal-robot" /><h3>{copy.restrictedTitle}</h3><p>{copy.restrictedMessage}</p></div>
@@ -140,6 +186,7 @@ function Widget(props: SpacebotProps): JSX.Element | null {
                 )}
                 {props.closeBehavior !== 'end' && !endFailed && !terminal && <button className="spacebot-link" type="button" disabled={busy} onClick={() => void finish()}>{copy.endLabel}</button>}
               </footer>
+              </>}
             </motion.section>
           </div>
         )}

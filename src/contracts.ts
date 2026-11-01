@@ -25,4 +25,12 @@ export const leadIntakeSchema = z.object({
   email: z.nullable(z.email().check(z.maxLength(254))),
   reply: z.string().check(z.minLength(1)),
 })
+export const voiceEventTypes = ['ready', 'warning', 'thinking', 'ended', 'finalized'] as const
+export const voiceServerEventSchema = z.discriminatedUnion('type', [
+  z.object({ type: z.literal('ready'), sdp: z.string().check(z.minLength(1)), remainingMs: z.number().check(z.nonnegative()) }),
+  z.object({ type: z.literal('warning') }),
+  z.object({ type: z.literal('thinking'), active: z.boolean() }),
+  z.object({ type: z.literal('ended'), reason: z.optional(z.enum(['timeout', 'ended', 'restricted', 'error'])) }),
+  z.object({ type: z.literal('finalized') }),
+])
 export const deliverySchema = z.object({ success: z.literal(true), alreadySent: z.optional(z.boolean()) })

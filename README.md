@@ -15,16 +15,19 @@
 
 A configurable React chatbot with an animated robot, streaming responses, optional lead capture, and structured integration events. Bring your own application API; Spacebot handles the interface and conversation lifecycle.
 
-- 🤖 Reusable SVG robot with waving, blinking, and reduced-motion support.
+- 🤖 Reusable SVG robot with a waving hand, fluttering cape, blinking visor, and reduced-motion support.
+- 🌗 Dark and light themes, with CSS variables for finer control.
 - 🎨 Scoped CSS, configurable placement and copy, and no Tailwind requirement.
 - 🔌 Replaceable transports for your assistant, lead intake, and transcript delivery.
+- 🎙️ Optional live voice calls over WebRTC, with your server holding the provider key.
+- 🧭 A clear “no backend connected” message and a [backend guide](docs/backend.md) with a minimal server.
 - 📦 Typed ESM package, ready to build and install as an npm tarball.
 
 ## Demo
 
-![Spacebot demo: the floating Spacy robot, its hover label, and a live conversation opened from the icon](docs/assets/spacebot-demo.gif)
+![Spacebot demo: the floating Spacy robot, its hover label, and a conversation opened from the icon](docs/assets/spacebot-demo.gif)
 
-Watch Spacy’s floating robot wave, hover to reveal the chat label, then click the icon to start a live conversation about customer-support automation. Recorded on [VectorSpace](https://vectorspace.com.au) using its live assistant.
+Watch Spacy’s floating robot wave, hover to reveal the chat label, then open a conversation about customer-support automation in the light theme. Recorded on [VectorSpace](https://vectorspace.com.au), which adds its own voice-or-chat chooser before the panel opens. The reply replays an answer from its live assistant, so no model was called during the recording.
 
 ## Quick start
 
@@ -38,12 +41,12 @@ npm run build
 npm pack
 ```
 
-This creates `spacebot-0.1.0.tgz`. `npm pack` also runs the build through `prepack`, so packing always refreshes the output. It does not publish anything to a registry.
+This creates `spacebot-0.2.0.tgz`. `npm pack` also runs the build through `prepack`, so packing always refreshes the output. It does not publish anything to a registry.
 
 From your React application:
 
 ```bash
-npm install /path/to/spacebot-0.1.0.tgz
+npm install /path/to/spacebot-0.2.0.tgz
 ```
 
 Import the stylesheet once, then render the widget. This first example works without a backend:
@@ -85,6 +88,8 @@ To explore the included demo, run `npm run dev` from this repository and open th
 | `closeBehavior` | `minimize` | `minimize` preserves the chat; `end` finishes it. Minimize mode includes a separate end action. |
 | `transcriptPolicy` | All triggers disabled | `onEnd`, `onPageHide`, and `requireConsent`. Configure a transcript transport before enabling delivery. |
 | `onEvent` | Unset | Receive typed, serializable snapshots and lifecycle events. |
+| `voice` | Disabled | `{ transport, askName?, maxDurationMs?, copy? }` adds a talk button and in-panel voice calls. See [Voice](#voice). |
+| `theme` | `dark` | `dark` or `light` built-in palette. Theme variables still override either one. |
 | `className`, `style` | Unset | Scoped customization and theme variables. |
 
 The robot can also be used separately:
@@ -95,7 +100,13 @@ import { SpacebotRobot } from 'spacebot'
 <SpacebotRobot waving style={{ width: 96, height: 96 }} />
 ```
 
-`SpacebotRobot` accepts `className`, `style`, `waving`, and `reduceMotion`. It is decorative; give an enclosing interactive element an accessible name. System reduced-motion preferences apply unless explicitly overridden.
+`SpacebotRobot` accepts `className`, `style`, `waving`, and `reduceMotion`. It is decorative; give an enclosing interactive element an accessible name. The cape flutters and the visor blinks whenever motion is allowed; `waving` adds the hand wave. System reduced-motion preferences apply unless explicitly overridden.
+
+The cape color comes from `--spacebot-robot-cape` (default `#6a45e4`). Set it on the widget's `style`, or on any ancestor of a standalone robot:
+
+```tsx
+<SpacebotRobot style={{ width: 96, height: 96, '--spacebot-robot-cape': '#e11d48' } as React.CSSProperties} />
+```
 
 ### Position and theme
 
@@ -104,6 +115,7 @@ Positions are `top-left`, `top-right`, `bottom-left`, `bottom-right`, `center-le
 ```tsx
 <Spacebot
   transport={transport}
+  theme="light"
   placement={{
     launcher: { position: 'center-left', offsetX: 16 },
     panel: { position: 'bottom-left', offsetX: 24, offsetY: 24 },
@@ -117,11 +129,30 @@ Positions are `top-left`, `top-right`, `bottom-left`, `bottom-right`, `center-le
 />
 ```
 
-Additional theme variables include `--spacebot-accent-hover`, `--spacebot-surface`, `--spacebot-bubble`, `--spacebot-border`, `--spacebot-text`, `--spacebot-muted`, `--spacebot-focus`, `--spacebot-font`, `--spacebot-heading-font`, `--spacebot-panel-height`, `--spacebot-launcher-size`, and `--spacebot-mobile-launcher-size`.
+`theme="light"` switches to a marshmallow-white panel with violet accents; the default `dark` theme is unchanged. Additional theme variables include `--spacebot-robot-cape`, `--spacebot-accent-hover`, `--spacebot-surface`, `--spacebot-bubble`, `--spacebot-border`, `--spacebot-text`, `--spacebot-muted`, `--spacebot-focus`, `--spacebot-font`, `--spacebot-heading-font`, `--spacebot-panel-height`, `--spacebot-launcher-size`, and `--spacebot-mobile-launcher-size`.
 
 The widget portals into `document.body`; place theme overrides on its `style` or `className`, rather than relying on a wrapper's inherited styles. No fonts are downloaded by the package. Keep offsets inside the viewport. Changing identity props updates the interface; existing messages and your backend's assistant persona remain unchanged. Changing the storage key remounts the conversation. Use a different key for each widget on the same origin.
 
+## Voice
+
+Pass a voice transport to add a microphone button to the panel. Visitors enter a name, then talk live; they can return to chat at any point.
+
+```tsx
+import { createHttpTransport, createHttpVoiceTransport, Spacebot } from 'spacebot'
+
+<Spacebot
+  transport={createHttpTransport({ endpoints: { chat: '/api/chat' } })}
+  voice={{ transport: createHttpVoiceTransport({ endpoint: '/api/voice' }), maxDurationMs: 120_000 }}
+/>
+```
+
+Your `/api/voice` endpoint creates the live session with your provider key and streams `ready`, `warning`, `thinking`, `ended`, and `finalized` events. The [backend guide](docs/backend.md) documents the contract and includes a minimal server. Voice needs HTTPS (or `localhost`) and microphone permission.
+
+For your own call interface, use `useSpacebotVoice({ transport, title, maxDurationMs, copy })` with the `SpacebotVoice` component, or drive `SpacebotVoiceClient` directly. Override any voice wording through `copy`; `defaultVoiceCopy(title)` returns the defaults.
+
 ## Connect your services
+
+No backend yet? The widget says so and links to the [backend guide](docs/backend.md), which documents the chat and voice contracts and includes a minimal server. Keep provider keys on your server.
 
 ```mermaid
 flowchart LR
@@ -221,6 +252,7 @@ npm pack --dry-run
 | `demo` | React demo with a mock transport and no Tailwind dependency. |
 | `tests` | Conversation and wire-protocol behavior checks. |
 | `docs/assets` | Project-owned README banner. |
+| `docs/backend.md` | Backend contracts and a minimal example server. |
 
 To distribute an update, increment the package version, run the checks, and pack again. Consumers should store the versioned tarball in their repository and install it through a relative file dependency, so CI does not need your source checkout. Installing the tarball may fetch its dependencies from npm.
 

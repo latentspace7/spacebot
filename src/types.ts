@@ -86,9 +86,81 @@ export type SpacebotCopy = {
   limitMessage: string
   sendLabel: string
   unavailableMessage: string
+  noBackendMessage: string
   deliveryError: string
   interruptedMessage: string
   leadSuccess: (name: string, canContinue: boolean) => string
+}
+export type VoiceConnectRequest = { sdp: string; name?: string }
+export type VoiceEndReason = 'timeout' | 'ended' | 'restricted' | 'error'
+export type VoiceServerEvent =
+  | { type: 'ready'; sdp: string; remainingMs: number }
+  | { type: 'warning' }
+  | { type: 'thinking'; active: boolean }
+  | { type: 'ended'; reason?: VoiceEndReason }
+  | { type: 'finalized' }
+export type SpacebotVoiceTransport = {
+  connect: (request: VoiceConnectRequest, context: RequestContext & { onEvent: (event: VoiceServerEvent) => void | Promise<void> }) => Promise<void>
+}
+export type SpacebotVoiceState = {
+  phase: 'idle' | 'connecting' | 'connected' | 'ended' | 'error'
+  activity: 'listening' | 'speaking' | 'thinking'
+  remaining: number
+  muted: boolean
+  level: number
+  warning: boolean
+  message: string
+  playbackBlocked: boolean
+}
+export type SpacebotVoiceCopy = {
+  unsupported: string
+  microphoneDenied: string
+  connectTimeout: string
+  connectionLost: string
+  connectionEnded: string
+  unreadable: string
+  unavailable: string
+  noBackend: string
+  failed: string
+  lost: string
+  ended: string
+  timeUp: string
+  restricted: string
+  idleStatus: string
+  connectingStatus: string
+  speakingStatus: string
+  thinkingStatus: string
+  listeningStatus: string
+  mutedStatus: string
+  endedStatus: string
+  liveLabel: string
+  idleLabel: string
+  remainingLabel: (seconds: number) => string
+  warningNotice: string
+  enablePlayback: string
+  retry: string
+  cancel: string
+  end: string
+  mute: string
+  unmute: string
+  continueInChat: string
+  preferChat: string
+  activeDisclosure: string
+  connectingDisclosure: string
+  idleDisclosure: string
+  talkLabel: string
+  backLabel: string
+  namePrompt: string
+  namePlaceholder: string
+  nameError: string
+  startLabel: string
+  privacyNotice: string
+}
+export type SpacebotVoiceOptions = {
+  transport: SpacebotVoiceTransport
+  maxDurationMs?: number
+  askName?: boolean
+  copy?: Partial<SpacebotVoiceCopy>
 }
 export type SpacebotProps = {
   transport: SpacebotTransport
@@ -105,6 +177,8 @@ export type SpacebotProps = {
   closeBehavior?: 'minimize' | 'end'
   transcriptPolicy?: { onEnd?: boolean; onPageHide?: boolean; requireConsent?: boolean }
   onEvent?: (event: SpacebotEvent) => void | Promise<void>
+  theme?: 'dark' | 'light'
+  voice?: SpacebotVoiceOptions
   className?: string
   style?: SpacebotStyle
 }

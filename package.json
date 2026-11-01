@@ -1,13 +1,14 @@
 {
   "name": "spacebot",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "An animated, configurable React chatbot with pluggable transports.",
   "private": true,
   "type": "module",
   "files": [
     "dist",
     "README.md",
-    "docs/assets"
+    "docs/assets/spacebot-banner.svg",
+    "docs/backend.md"
   ],
   "main": "./dist/spacebot.js",
   "module": "./dist/spacebot.js",
